@@ -12,6 +12,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Security
 ### Added
 ### Fixed
+- Lint checks entry length in the [Unreleased] section only; released sections are skipped
 ### Changed
 ### Deprecated
 ### Removed
@@ -30,30 +31,30 @@ Releases that have at least been deployed to staging, BUT NOT necessarily releas
 - Apply parent folder segments after following symbolic links when resolving changelog paths (#422)
 - Preserve the changelog's existing line endings when writing it - placeholder
 - Clear error when no git repository is found or the repository is bare (#424)
-- A clear error is reported when the folder the command-line tool or MCP server was started in has been deleted, instead of a raw exception (#425)
+- Clear error instead of a raw exception when the CLI or MCP server's start folder was deleted (#425)
 ### Changed
-- MCP server: tools/list now returns tools sorted by name (ordinal, case-insensitive), so clients see a stable, predictable tool order - #417
+- MCP server: tools/list returns tools sorted by name (ordinal, case-insensitive), a stable order #417
 
 ## [1.10.219] - 2026-11-23
 ### Security
-- MCP server: when no repository root can be found (CHANGELOG_MCP_REPO_ROOT not set and no git repository at or above the folder it was started in) every tool now returns an error naming that folder, instead of working on that folder and creating a CHANGELOG.md there
+- MCP server: with no repo root (no CHANGELOG_MCP_REPO_ROOT or git repo) tools error naming the folder
 ### Added
-- MCP server: CHANGELOG_MCP_REPO_ROOT environment variable naming the repository the server works on, so it can be started from any folder
+- MCP server: CHANGELOG_MCP_REPO_ROOT names the repository to work on, so it can start from any folder
 ### Fixed
-- Changelog checks now resolve the changelog's path through symbolic links before finding it in the repository, so the release-section check no longer falsely passes or crashes when the changelog is reached through a link; this also fixes the command-line tool's check of whether the changelog was modified in the release section
-- Pointer tool package now only lists RID packages that are published (linux-x64 native AOT plus framework-dependent any fallback)
+- Changelog checks resolve symlinks first, so the release-section check no longer misfires or crashes
+- Pointer tool package lists only published RID packages (linux-x64 native AOT plus any fallback)
 ### Changed
-- MCP server: tools never create CHANGELOG.md; when it is missing they return an error naming the folder, and creating one stays an explicit step with the command-line tool
+- MCP server: tools never create a missing CHANGELOG.md; they error naming the folder (CLI creates it)
 
 ## [1.10.218] - 2026-11-20
 ### Fixed
-- The Native AOT build of credfeto-changelog-cmd no longer aborts with exit code 134 in --check-insert (and the MCP check-insert tool no longer kills the server); CI now runs every mode of the published native binaries so an AOT-only crash fails the build - #413
+- Native AOT --check-insert no longer aborts (exit 134) or kills MCP server; CI tests every mode #413
 
 ## [1.10.217] - 2026-11-19
 ### Fixed
-- Command-line operations in credfeto-changelog-cmd are now mutually exclusive; combining operations or using modifiers (-m, -p, --fix, -v) with the wrong operation fails with an error and exit code 1 before any file is touched - #389
-- Unreleased preamble lines (non-blank text between [Unreleased] and its first ### heading) are no longer silently dropped; they are kept, --lint reports each one as an error naming its line, and --un-released shows them - #399
-- Test and benchmark code no longer suppresses CA2012 with SuppressMessage; the root cause is fixed by using async test helpers instead of blocking on ValueTask, and a shared ChangeLogStorageMock helper replaces repeated NSubstitute setups - #379
+- CLI operations are mutually exclusive; bad combinations or modifiers fail with exit 1 untouched #389
+- Unreleased preamble lines are kept; --lint reports each one and --un-released shows them (#399)
+- Tests fix CA2012 with async helpers, not SuppressMessage; shared ChangeLogStorageMock added (#379)
 ### Changed
 - Dependencies - Updated FunFair.CodeAnalysis to 7.2.26.2691
 - Dependencies - Updated Meziantou.Analyzer to 3.0.340
@@ -63,8 +64,8 @@ Releases that have at least been deployed to staging, BUT NOT necessarily releas
 - Dependencies - Updated xunit.v3 to 4.0.3
 - Dependencies - Updated Microsoft.Extensions to 11.0.0
 - SDK - Updated DotNet SDK to 11.0.100
-- Native AOT and trimming enabled for the Credfeto.ChangeLog.Cmd tool, published as a linux-x64 native package. CommandLineParser replaced with a trim-safe parser, and --help now exits with code 0
-- Native AOT and full trimming enabled for the Credfeto.ChangeLog.Mcp (changelog-mcp) tool, packed as per-RID native packages with the trim, AOT and single-file analysers enabled - #410
+- Native AOT and trimming for Credfeto.ChangeLog.Cmd (linux-x64); trim-safe parser; --help exits 0
+- Native AOT and full trimming for Credfeto.ChangeLog.Mcp, per-RID native packages, analysers on #410
 
 ## [1.10.216] - 2026-11-14
 ### Changed
@@ -72,17 +73,17 @@ Releases that have at least been deployed to staging, BUT NOT necessarily releas
 
 ## [1.10.215] - 2026-11-13
 ### Added
-- Added a --self-test switch that proves the tool can start: it resolves all services without touching files, git or the network, and exits non-zero with a one-line reason on stderr if it cannot (#398)
-- Added a changelog MCP server, a stdio dotnet tool (Credfeto.ChangeLog.Mcp, command changelog-mcp) that lets MCP clients manage CHANGELOG.md through changelog_add, changelog_remove, changelog_unreleased, changelog_extract, changelog_create_release, changelog_check_insert and changelog_lint tools, so AI agents can maintain changelog entries without hand-editing the file (#400)
+- --self-test: resolves all services without touching files, git or network; non-zero on failure #398
+- Changelog MCP server (Credfeto.ChangeLog.Mcp, changelog-mcp) lets AI agents manage CHANGELOG.md #400
 ### Fixed
-- Changelog parser now uses an explicit StringComparison when comparing strings, fixing analyzer warning MA0001
+- Changelog parser uses an explicit StringComparison when comparing strings, fixing analyzer MA0001
 ### Changed
 - Dependencies - Updated Credfeto.Enumeration to 1.2.158.2511
 - SDK - Updated DotNet SDK to 11.0.100-rc.3.26522.148
 - Target .NET 11 - all projects now target net11.0 and build with the .NET 11.0.100-rc.3 SDK
-- Build - enabled the runtime-async compiler feature so async code runs on the .NET 11 runtime async path
+- Build - enabled the runtime-async compiler feature so async code uses the .NET 11 runtime async path
 ### Removed
-- Redundant Microsoft.Extensions.DependencyInjection.Abstractions package reference, which is already provided by the framework
+- Redundant Microsoft.Extensions.DependencyInjection.Abstractions reference (framework provides it)
 
 ## [1.10.213] - 2026-11-04
 ### Changed
@@ -154,11 +155,11 @@ Releases that have at least been deployed to staging, BUT NOT necessarily releas
 
 ## [1.10.203] - 2026-09-06
 ### Fixed
-- Release dates are now computed via an injectable time source (deterministic and testable) rather than the system clock directly, and ChangeLogChecker/FileSystemChangeLogStorage are now public types rather than internal (issue #364). BREAKING: ChangeLogUpdater's constructor now requires a TimeProvider argument, and the static ChangeLogUpdater.CreateRelease now takes a plain date string (validated non-empty) instead of a pending flag plus language - pass the new public ChangeLogRelease.PendingDate constant to request a pending release
-- Non-English ChangeLogLanguage definitions are now usable: the parser and serialiser thread the active ChangeLogLanguage through the [Unreleased]/document-title parse and serialise path instead of hardcoding the English literal (issue #333). BREAKING: IChangeLogParser.ParseAsync, IChangeLogSerialiser.SerialiseAsync, IChangeLogStorage.LoadAsync/SaveAsync, IChangeLogChecker.ChangeLogModifiedInReleaseSectionAsync, and IChangeLogReader.ExtractReleaseNotesFromFileAsync/FindFirstReleaseVersionPositionAsync now all require a ChangeLogLanguage parameter
-- Lint errors for [Unreleased] sections now report the real heading line number instead of always reporting Line 0
-- ChangeLogReader.AppendSection now excludes whitespace-only entries the same way it already excludes blank ones, so extracted release notes no longer contain a section heading followed by a blank/whitespace line (issue #375)
-- Entry type matching for the add and remove commands (e.g. added, ADDED) is now resolved case-insensitively against the canonical section heading (e.g. ### Added) instead of requiring exact-case input (issue #300)
+- Injectable TimeProvider for release dates; checker/storage public. BREAKING: ctor/CreateRelease #364
+- Non-English ChangeLogLanguage works end to end. BREAKING: parse/save/check/read take a language #333
+- Lint errors for [Unreleased] sections report the real heading line number instead of always Line 0
+- Extracted release notes no longer include whitespace-only entries (AppendSection) (issue #375)
+- add and remove match entry types (e.g. added, ADDED) to section headings case-insensitively (#300)
 ### Changed
 - Dependencies - Updated Credfeto.Enumeration to 1.2.153.2254
 - Dependencies - Updated Meziantou.Analyzer to 3.0.217
@@ -168,24 +169,24 @@ Releases that have at least been deployed to staging, BUT NOT necessarily releas
 
 ## [1.10.202] - 2026-08-27
 ### Fixed
-- BuildReleaseSections now excludes whitespace-only unreleased lines the same way it already excludes blank ones, so CreateRelease correctly throws EmptyChangeLogException instead of producing a release with only whitespace content
-- ChangeLogLinter/ChangeLogFixer now enforce exactly one blank line before the [Unreleased] trailer comment (previously unchecked, so a freshly generated changelog and one built purely via add/remove entries could permanently disagree on this whitespace); dotnet changelog --lint --fix now corrects it (issue #376). BREAKING for --lint-only consumers: a pre-existing changelog missing this blank line will now fail dotnet changelog --lint until --fix is run once against it
+- CreateRelease throws EmptyChangeLogException when unreleased lines are only whitespace
+- Lint/fix enforce one blank line before the [Unreleased] trailer comment (#376). BREAKING for --lint
 
 ## [1.10.201] - 2026-08-25
 ### Fixed
-- ChangeLogSerialiser/ChangeLogParser - the changelog write path inconsistently inserted or omitted the blank line before the following release heading; every release heading (including the first one after Unreleased) is now normalised to exactly one blank line before it, and lint/lint-fix detect and correct violations
+- Serialiser/parser put exactly one blank line before every release heading; lint/fix check it
 
 ## [1.10.200] - 2026-08-23
 ### Fixed
-- ChangeLogChecker - Fixed off-by-one boundary check that flagged edits to the line immediately before a release header as modifying the released section
-- Program - --additional-sections now applies to --add, --remove, and --create-release, not just --lint
-- ChangeLogChecker - Fixed check-insert false positive ('Changelog modified in released section') when origin/main advances (e.g. cuts a release) after the branch diverged; the diff is now taken against the merge base instead of origin's tip
-- Fixed build break from FunFair.Test 6.4.0.2617 update by switching xunit.v3.mtp-v2 package reference to xunit.v3.aot.mtp-v2 (FunFair.Test.Common now depends on the AOT xunit variants)
-- Fixed CA1822 build errors introduced by FunFair.Test.Common 6.4.0.2617 by marking theory test methods that do not access instance data as static
+- ChangeLogChecker - fixed off-by-one that flagged edits just before a release header as released
+- Program - --additional-sections now applies to --add, --remove and --create-release, not just --lint
+- ChangeLogChecker - check-insert diffs against the merge base, not origin's tip (no false positive)
+- Fixed build break from FunFair.Test 6.4.0.2617 by switching to xunit.v3.aot.mtp-v2
+- Fixed CA1822 errors from FunFair.Test.Common 6.4.0.2617 by making instance-free theory tests static
 ### Changed
 - Dependencies - Updated xunit.analyzers to 2.0.0
 - Dependencies - Updated xunit.v3 to 4.0.0
-- ChangeLogUpdater - Hoisted the loop-invariant requested-version parse out of ValidateVersionNotExists so it is parsed once per --create-release invocation instead of once per existing release
+- ChangeLogUpdater - requested version parsed once per --create-release, not once per existing release
 - Dependencies - Updated FunFair.CodeAnalysis to 7.2.13.2323
 - Dependencies - Updated FunFair.Test to 6.3.9.2602
 - Dependencies - Updated FunFair.Test.Source.Generator to 6.3.9.2602
@@ -221,7 +222,7 @@ Releases that have at least been deployed to staging, BUT NOT necessarily releas
 
 ## [1.10.196] - 2026-07-31
 ### Fixed
-- Changelog linter now rejects release dates that don't match the configured language format, including previously-accepted garbage values
+- Changelog linter rejects release dates not matching the language format, even formerly accepted ones
 - Correct repository URL references to the canonical credfeto-changelog-manager repo name
 ### Changed
 - Dependencies - Updated AsyncFixer to 2.1.0
@@ -238,79 +239,79 @@ Releases that have at least been deployed to staging, BUT NOT necessarily releas
 - Dependencies - Updated Microsoft.Extensions to 10.0.10
 - Dependencies - Updated NSubstitute to 6.0.0
 - Dependencies - Updated FunFair.CodeAnalysis to 7.2.11.2216
-- Exposed changelog parser, serialiser, reader, linter, fixer, updater and detector services (previously internal) as public API, along with related helper types, so tests exercise them directly instead of via InternalsVisibleTo
+- Parser, serialiser, reader, linter, fixer, updater and detector services are now public API
 - Dependencies - Updated FunFair.Test to 6.3.6.2484
 - Dependencies - Updated Meziantou.Analyzer to 3.0.124
 - Dropped net9.0 support - now targets net10.0 only
 - Reduce allocations in TextBlockToLines.SplitToLines by using a single multi-separator split (#329)
 ### Removed
-- Dead code left behind by the ChangeLogDocument refactor (unused Throws helpers, regexes, extensions, net7 conditional)
+- Dead code left by the ChangeLogDocument refactor (unused Throws helpers, regexes, extensions, net7)
 
 ## [1.10.195] - 2026-07-19
 ### Added
 - add DI registration extension AddChangeLog to configure IChangeLogLoader
-- add service interfaces IChangeLogReader, IChangeLogLinter, IChangeLogFixer, IChangeLogUpdater with file-backed implementations injectable via DI
-- Mock-based unit tests for ChangeLogReader, ChangeLogFixer, ChangeLogLinter, ChangeLogUpdater services using NSubstitute
+- add IChangeLogReader, IChangeLogLinter, IChangeLogFixer, IChangeLogUpdater with DI file-backed impls
+- NSubstitute mock tests for ChangeLogReader, ChangeLogFixer, ChangeLogLinter and ChangeLogUpdater
 - DI registration tests in ChangeLogSetupTests verifying all services are resolvable via AddChangeLog
-- Ensure preamble is inserted on every changelog edit operation (AddEntry, RemoveEntry, CreateRelease, EnsureUnreleasedSections), not only during Fix
+- Ensure preamble is inserted on every changelog edit (add, remove, release, sections), not only Fix
 - Support yanked releases (## [version] - date [YANKED]) per Keep a Changelog 1.1.0 spec
-- Support comparison links in version footers - parse and round-trip reference-style links at the bottom of CHANGELOG files
-- Added date format validation to changelog linter to detect incorrectly formatted release dates (#296)
-- Add support for all language versions of Keep a Changelog listed on keepachangelog.com (cs, da, de, es, fr, it, nl, pl, pt-BR, ru, tr, uk, zh-CN, zh-TW)
+- Support comparison links in version footers (parse and round-trip reference-style links)
+- Added date format validation to the changelog linter to detect badly formatted release dates (#296)
+- Support all keepachangelog.com languages (cs da de es fr it nl pl pt-BR ru tr uk zh-CN zh-TW)
 - Tests for Credfeto.ChangeLog.Cmd
 - Increase code coverage to 100% for Credfeto.ChangeLog
-- Added a regression-guard benchmark with a committed allocation baseline for ChangeLogParser.MoveTrailingBlanks (issue #254)
+- Regression-guard benchmark with a committed allocation baseline for MoveTrailingBlanks (issue #254)
 ### Fixed
-- Fixed Pull Request workflow failing when pull_request_target jobs used local composite actions without a prior workspace checkout
-- Provide properly translated section names and unreleased section labels for Czech, Danish, German, Spanish, French, Italian, Dutch, Chinese Simplified, and Chinese Traditional — these were incorrectly using English section order
-- ChangeLogDetector no longer reports 'changelog not found' due to access errors in nested directories; checks root CHANGELOG.md first without a full directory scan
-- CLI no longer silently exits 0 when required option combinations are incomplete (--add/--remove without --message, --extract without --version, --version without --extract, or no recognised command) — it now throws InvalidOptionsException and exits with a non-zero code.
-- Fix ChangeLogParser crash (ArgumentOutOfRangeException) on version headers with a missing closing bracket or malformed date separator
+- Fixed Pull Request workflow: pull_request_target jobs used local composite actions without checkout
+- Translated section names/unreleased labels (cs, da, de, es, fr, it, nl, zh-CN, zh-TW), not English
+- ChangeLogDetector checks root CHANGELOG.md first; nested access errors no longer mean 'not found'
+- CLI no longer exits 0 on incomplete option combinations; it throws InvalidOptionsException, non-zero
+- Fix ChangeLogParser crash on version headers missing a closing bracket or with a bad date separator
 - CreateEmptyAsync now writes the full initial changelog template (#334)
-- Fixed --lint --fix not converging in a single pass when a changelog section heading was followed by two or more blank lines
+- Fixed --lint --fix needing several passes when a section heading was followed by 2+ blank lines
 ### Changed
-- ChangeLogSections: added static FrozenSet<string> KnownSections pre-built from Order, replacing per-call HashSet allocation in BuildNewUnreleasedContent
+- ChangeLogSections: static FrozenSet KnownSections replaces a per-call HashSet allocation
 - Refined changelog section linting and related updater/fixer command behaviour.
 - Extracted shared changelog heading extension methods and reused them in reader/linter.
 - Dependencies - Updated Meziantou.Analyzer to 2.0.219
 - Dotnet 10
-- Reduced heap allocations in EnsureUnreleasedSections by pre-computing section heading strings in ChangeLogSections rather than concatenating them on every call
+- Fewer allocations in EnsureUnreleasedSections via pre-computed section heading strings
 - Refined changelog section linting and related updater/fixer command behaviour.
 - Extracted shared changelog heading extension methods and reused them in reader/linter.
-- Centralised changelog file loading behind a shared loader abstraction and added file-operation coverage tests.
+- Centralised changelog file loading behind a shared loader abstraction; added file-operation tests.
 - remove IsSubHeading wrapper and inline IsChangeTypeHeading extension calls
 - remove IsChangeTypeHeadingOrVersionHeading wrapper and inline extension calls
 - replace string.Join with LinesToText extension and Split with SplitToLines
 - update CLI and tests to resolve changelog operations through DI
-- Reorganised Credfeto.ChangeLog into Extensions, Models, and Services sub-folders with matching namespaces
-- Renamed IChangeLogLoader to IChangeLogStorage and FileSystemChangeLogLoader to FileSystemChangeLogStorage to reflect load and save responsibilities
-- Extracted common string comparison, HTML comment detection, and unreleased-section helpers into ChangeLogHeadingExtensions
+- Reorganised Credfeto.ChangeLog into Extensions, Models and Services folders with matching namespaces
+- Renamed IChangeLogLoader/FileSystemChangeLogLoader to IChangeLogStorage/FileSystemChangeLogStorage
+- Extracted string comparison, HTML comment and unreleased helpers into ChangeLogHeadingExtensions
 - Split ChangeLogUpdater and ChangeLogLinter into focused partial class files by responsibility
-- Extracted FindUnreleasedStart as a shared extension method; replaced duplicated IsRelease private method with IsVersionHeader extension
-- ChangeLogLanguageFactory is now a non-static class implementing IChangeLogLanguageFactory; language code changed from 'keep-a-changelog' to 'en'
-- Refactored service layer: IChangeLogStorage reduced to LoadAsync/SaveAsync; ChangeLogLanguage moved to method parameters; ChangeLogLanguageFactory made non-static implementing IChangeLogLanguageFactory with English constant renamed from KeepAChangelog to English
+- Shared FindUnreleasedStart extension; duplicated IsRelease replaced with IsVersionHeader extension
+- ChangeLogLanguageFactory non-static (IChangeLogLanguageFactory); language 'keep-a-changelog' -> 'en'
+- Service layer: IChangeLogStorage only Load/Save; language passed per call; KeepAChangelog -> English
 - Maintain the keepachangelog.com and semver.org preamble URLs in changelog headers when fixing
 - replace CountOccurrences helper with source-generated regex in ChangeLogFixerTests
-- Replaced System.Linq LINQ .Where() with ZLinq .AsValueEnumerable().Where() to eliminate heap allocation of enumerators
-- Replaced System.Linq .Where() with ZLinq .AsValueEnumerable().Where() to eliminate per-call heap allocations in enumeration hot paths
+- Replaced System.Linq .Where() with ZLinq .AsValueEnumerable().Where() to avoid enumerator allocation
+- Replaced System.Linq .Where() with ZLinq .AsValueEnumerable().Where() in enumeration hot paths
 - Exceptions now use Credfeto.Exceptions.SourceGenerator source generator to reduce boilerplate
-- ChangeLogDetector now skips the .git directory and uses IgnoreInaccessible enumeration when scanning for changelogs in subdirectories
-- Improved performance when checking changelog modifications by limiting git diff to the changelog file only
-- Refactored MoveTrailingBlanks in ChangeLogParser to avoid repeated O(n) element shifting when moving trailing blank lines into the trailer
+- ChangeLogDetector skips .git and uses IgnoreInaccessible when scanning subdirectories for changelogs
+- Faster changelog modification checks by limiting git diff to the changelog file only
+- MoveTrailingBlanks in ChangeLogParser avoids repeated O(n) shifting when moving trailing blank lines
 - SDK - Updated DotNet SDK to 10.0.302
 ### Removed
-- Removed ChangeLogSections helper class; each language now specifies its own section order inline, accessed only through the language object
+- Removed ChangeLogSections helper; each language defines its section order inline
 
 ## [1.10.194] - 2026-05-05
 ### Added
-- Automatically fixes changelogs that have missing or out-of-order sections in [Unreleased], ensuring all standard sections are present and in the correct order
-- Benchmarks for EnsureUnreleasedSections to measure allocations per operation and enforce regression baselines
+- Auto-fixes missing or out-of-order [Unreleased] sections so all standard sections exist in order
+- Benchmarks for EnsureUnreleasedSections measure allocations per operation with regression baselines
 - Add lint command to validate changelog format (--lint, --additional-sections, --fix)
 ### Changed
 - Dependencies - Updated Meziantou.Analyzer to 2.0.219
 - Dotnet 10
 - SDK - Updated DotNet SDK to 10.0.200
-- Reduced heap allocations in EnsureUnreleasedSections by pre-computing section heading strings in ChangeLogSections rather than concatenating them on every call
+- Fewer allocations in EnsureUnreleasedSections via pre-computed section heading strings
 
 ## [1.10.193] - 2025-09-12
 ### Changed
@@ -1515,7 +1516,7 @@ Releases that have at least been deployed to staging, BUT NOT necessarily releas
 ### Added
 - Added ability to set date on release or to have it marked as TBD\pending
 ### Fixed
-- Fixed bug where an entry would be added to an existing release if the heading did not exist in the [unreleased] section
+- Fixed an entry being added to an existing release when the heading was missing from [unreleased]
 - Fixing changelog manager erroring on latest ubuntu on github actions
 ### Changed
 - FF-1429 - Updated AsyncFixer to 1.4.0
